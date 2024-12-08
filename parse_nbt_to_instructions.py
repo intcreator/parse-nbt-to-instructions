@@ -63,22 +63,20 @@ for block in nbt_file["blocks"]:
 
 print(f"highest y coord is {int(highest_y_coord)}")
 
-instructions_intro = 'Coordinates are given in x, y, z format (corresponding to the current "Block" in the F3 screen). If a full block is placed correctly, the y coordinate will match the F3 screen when you are standing on the block (non-full blocks like glow_lichen will have a y coordinate of y - 1 when you are standing on them). Instructions are intended to be followed south to north and west to east. Feather falling boots are recommended.'
-
 if not os.path.exists(INSTRUCTIONS_FOLDER_NAME):
     os.makedirs(INSTRUCTIONS_FOLDER_NAME)
 for filename in os.listdir(INSTRUCTIONS_FOLDER_NAME):
     os.remove(f"{INSTRUCTIONS_FOLDER_NAME}/{filename}")
 for chunk_x, chunk_row in chunks.items():
     for chunk_z, chunk in chunk_row.items():
-        chunk_file_data = "\n".join(textwrap.wrap(instructions_intro, 70)) + "\n\n"
+        chunk_file_data = ""
         # chunk_file_data = f"{'':<8}"
         chunk_materials = {}
         # x coord column headers
         # for coord_x in list(chunk.values())[0]:
         #     chunk_file_data += f"x: {str(int(coord_x)): <22}"
         # chunk_file_data += "\n"
-        for coord_z, row in chunk.items():
+        for coord_z, row in sorted(chunk.items(), reverse=True):
             # z coord row headers
             # chunk_file_data += f"z: {str(int(coord_z)): <5}"
             for coord_x, block in row.items():
@@ -100,7 +98,7 @@ for chunk_x, chunk_row in chunks.items():
                 chunk_materials[material] += 1
                 coord_y = block["y_coord"]
                 chunk_file_data += (
-                    f"{coord_x:<4} {coord_y:<4} {coord_z:<4} {material: <25}"
+                    f"{coord_x:<4} {coord_y:<3} {coord_z:<4} {material: <25}"
                 )
             chunk_file_data += "\n"
         chunk_file_data += "\nMaterials:\n"
@@ -115,7 +113,7 @@ materials_list = f"All Materials:\n\n{'type':<25} {'quantity': <10} {'stacks': <
 for material in dict(
     sorted(all_materials.items(), key=lambda item: item[1], reverse=True)
 ):
-    materials_list += f"{material: <25} {all_materials[material]: <10} {round(all_materials[material] / 64, 1): <8} {round(all_materials[material] / (64 * 27), 1): <8}\n"
+    materials_list += f"{material: <25} {all_materials[material]: <10} {round(all_materials[material] / 64, 1): <8} {round(all_materials[material] / (64 * 27 * 2), 1): <8}\n"
 
 with open(f"materials_list.txt", "w") as materials_list_file:
     materials_list_file.write(materials_list)
