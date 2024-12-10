@@ -1,6 +1,7 @@
 import nbtlib
 import os
-import textwrap
+
+import material_order
 
 nbt_file = nbtlib.load("mosaic_full.nbt")
 with open("mosaic_full.snbt", "w") as snbt_file:
@@ -30,6 +31,15 @@ for material in nbt_file["palette"]:
 
 all_materials = {}
 highest_y_coord = -64
+
+
+def material_sort(material):
+    try:
+        return material_order.material_order_dict[material[0]]
+    except KeyError:
+        # if we can't find the key just add it to the end of the list
+        return 9999
+
 
 for block in nbt_file["blocks"]:
     x_coord = STARTING_X_COORD + block["pos"][0]
@@ -76,7 +86,7 @@ for chunk_x, chunk_row in chunks.items():
         # for coord_x in list(chunk.values())[0]:
         #     chunk_file_data += f"x: {str(int(coord_x)): <22}"
         # chunk_file_data += "\n"
-        for coord_z, row in sorted(chunk.items(), reverse=True):
+        for coord_z, row in sorted(chunk.items()):
             # z coord row headers
             # chunk_file_data += f"z: {str(int(coord_z)): <5}"
             for coord_x, block in row.items():
@@ -102,17 +112,13 @@ for chunk_x, chunk_row in chunks.items():
                 )
             chunk_file_data += "\n"
         chunk_file_data += "\nMaterials:\n"
-        for material in dict(
-            sorted(chunk_materials.items(), key=lambda item: item[1], reverse=True)
-        ):
+        for material in dict(sorted(chunk_materials.items(), key=material_sort)):
             chunk_file_data += f"{material: <25} {chunk_materials[material]}\n"
         with open(f"chunks/{chunk_x}-{chunk_z}.txt", "w") as chunk_file:
             chunk_file.write(chunk_file_data)
 
 materials_list = f"All Materials:\n\n{'type':<25} {'quantity': <10} {'stacks': <8} {'double chests': <8}\n\n"
-for material in dict(
-    sorted(all_materials.items(), key=lambda item: item[1], reverse=True)
-):
+for material in dict(sorted(all_materials.items(), key=material_sort)):
     materials_list += f"{material: <25} {all_materials[material]: <10} {round(all_materials[material] / 64, 1): <8} {round(all_materials[material] / (64 * 27 * 2), 1): <8}\n"
 
 with open(f"materials_list.txt", "w") as materials_list_file:

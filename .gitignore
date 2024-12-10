@@ -6,3 +6,5 @@ chunks
 materials_list.txt
 # notes specific to your server, like important coordinates
 notes
+# Python ignore
+__pycache__
